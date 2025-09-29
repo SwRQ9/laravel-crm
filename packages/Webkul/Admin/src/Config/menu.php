@@ -99,6 +99,18 @@ return [
         'icon-class' => 'icon-activity',
     ],
 
+
+    /**
+     * daily-activities.
+     */
+     [
+        'key' => 'daily-activities',
+        'name' => 'Daily Activities',
+        'route' => 'daily-activities.form',
+        'sort' => 8,
+        'icon-class' => 'icon-activity', 
+    ],
+
     /**
      * Contacts.
      */
