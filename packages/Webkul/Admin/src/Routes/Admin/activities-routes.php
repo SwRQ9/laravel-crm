@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Webkul\Admin\Http\Controllers\Activity\ActivityController;
+use App\Http\Controllers\DailyActivityController;
+
 
 Route::controller(ActivityController::class)->prefix('activities')->group(function () {
     Route::get('', 'index')->name('admin.activities.index');
@@ -22,3 +24,11 @@ Route::controller(ActivityController::class)->prefix('activities')->group(functi
 
     Route::post('mass-destroy', 'massDestroy')->name('admin.activities.mass_delete');
 });
+
+// Daily Activities
+Route::prefix('daily-activities')->group(function () {
+    Route::get('/', [DailyActivityController::class, 'index'])->name('admin.daily_activities.index');
+    Route::get('form', [DailyActivityController::class, 'form'])->name('admin.daily_activities.form');
+    Route::post('/store', [DailyActivityController::class, 'store'])->name('admin.daily_activities.store');
+});
+

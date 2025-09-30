@@ -17,25 +17,30 @@ class DailyActivityController extends Controller
      * Optional filters: ?from=YYYY-MM-DD&to=YYYY-MM-DD
      */
     public function index(Request $request)
-    {
-        $q = DailyActivity::with('user')->orderByDesc('date');
+{
+    $q = DailyActivity::with('user')->orderByDesc('date');
 
-        // filter: mine or all
-        if (!$request->boolean('all')) {
-            $q->where('user_id', Auth::id());
-        }
-
-        // optional date range filters
-        if ($from = $request->date('from')) {
-            $q->whereDate('date', '>=', $from);
-        }
-        if ($to = $request->date('to')) {
-            $q->whereDate('date', '<=', $to);
-        }
-
-        // For now, return JSON. In Step 4 we'll return a view.
-        return response()->json($q->paginate(20));
+    if (!$request->boolean('all')) {
+        $q->where('user_id', Auth::id());
     }
+
+    if ($from = $request->date('from')) {
+        $q->whereDate('date', '>=', $from);
+    }
+    if ($to = $request->date('to')) {
+        $q->whereDate('date', '<=', $to);
+    }
+
+    $activities = $q->paginate(20);
+
+    return view('admin::daily_activities.index', compact('activities'));
+}
+
+public function create()
+{
+    return view('admin::daily_activities.form');
+}
+
 
     /**
      * Show a single submission (drilldown).
@@ -71,16 +76,17 @@ class DailyActivityController extends Controller
         'date'    => $validated['date'] ?? now()->toDateString(),
     ]);
 
-    // Insert all entries (use ID directly from form)
-    foreach ($validated['activities'] as $typeId => $value) {
-        if ($value !== null) {
-            DailyActivityEntry::create([
-                'daily_activity_id' => $daily->id,
-                'activity_type_id'  => $typeId,   // already an ID
-                'value'             => $value,
-            ]);
-        }
-    }
+    // Insert all entries (lookup activity type ID by slug)
+    foreach (ActivityType::all() as $type) {
+    $value = $request->input("activities.{$type->slug}", 0);
+
+    DailyActivityEntry::create([
+        'daily_activity_id' => $daily->id,
+        'activity_type_id'  => $type->id,
+        'value'             => $value,
+    ]);
+}
+
 
     // Calculate total points
     $totalPoints = $daily->entries()
