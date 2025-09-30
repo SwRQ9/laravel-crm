@@ -106,7 +106,7 @@ return [
      [
         'key' => 'daily-activities',
         'name' => 'Daily Activities',
-        'route' => 'daily-activities.form',
+        'route' => 'admin.daily_activities.index',
         'sort' => 8,
         'icon-class' => 'icon-activity', 
     ],
