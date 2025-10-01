@@ -16,7 +16,7 @@ class DailyActivityController extends Controller
      * - Otherwise show only the current user's submissions.
      * Optional filters: ?from=YYYY-MM-DD&to=YYYY-MM-DD
      */
-    public function index(Request $request)
+   public function index(Request $request)
 {
     $q = DailyActivity::with('user')->orderByDesc('date');
 
@@ -24,17 +24,20 @@ class DailyActivityController extends Controller
         $q->where('user_id', Auth::id());
     }
 
-    if ($from = $request->date('from')) {
-        $q->whereDate('date', '>=', $from);
-    }
-    if ($to = $request->date('to')) {
-        $q->whereDate('date', '<=', $to);
+    // Use start_date and end_date (same as input names)
+    if ($from = $request->input('start_date')) {
+        $q->where('created_at', '>=', $from);
     }
 
-    $activities = $q->paginate(20);
+    if ($to = $request->input('end_date')) {
+        $q->where('created_at', '<=', $to);
+    }
+
+    $activities = $q->paginate(10);
 
     return view('admin::daily_activities.index', compact('activities'));
 }
+
 
 public function create()
 {
@@ -45,15 +48,7 @@ public function create()
     /**
      * Show a single submission (drilldown).
      */
-    public function show(DailyActivity $dailyActivity)
-    {
-        // basic ownership check (you can replace with policies later)
-        if ($dailyActivity->user_id !== Auth::id() && !request()->boolean('all')) {
-            abort(403);
-        }
-
-        return response()->json($dailyActivity->load('user'));
-    }
+    
 
     /**
      * Store or update today's submission for current user.
@@ -98,7 +93,7 @@ public function create()
     $daily->update(['total_points' => $totalPoints]);
 
     return redirect()
-        ->route('daily-activities.form')
+        ->route('admin.daily_activities.index')
         ->with('success', 'Daily activities submitted successfully!');
 }
 
@@ -148,5 +143,55 @@ public function create()
     return view('daily_activities.form', compact('activityTypes'));
 }
 
+public function show(DailyActivity $dailyActivity)
+{
+    // Ownership check (keep your current rule)
+    if ($dailyActivity->user_id !== Auth::id() && !request()->boolean('all')) {
+        abort(403);
+    }
+
+    // If AJAX/JSON requested → return JSON
+    if (request()->wantsJson() || request()->ajax()) {
+        return response()->json($dailyActivity->load('user'));
+    }
+
+    // Otherwise → return Blade view (normal browser navigation)
+    return view('admin::daily_activities.show', [
+        'activity' => $dailyActivity->load('user'),
+    ]);
+}
+
+public function edit(DailyActivity $dailyActivity)
+{
+    // later we’ll enforce same-day restriction
+    return view('admin::daily_activities.edit', [
+        'activity' => $dailyActivity,
+    ]);
+}
+
+public function update(Request $request, DailyActivity $dailyActivity)
+{
+    // validate like in store()
+    $data = $request->validate([
+        // add your tally fields here
+    ]);
+
+    // compute total points (same logic as in store)
+    $dailyActivity->update([
+        // …map $data here…
+        'total_points' => $this->computeTotalPoints($data),
+    ]);
+
+    return redirect()->route('admin.daily_activities.index')
+                     ->with('success', 'Submission updated.');
+}
+
+public function destroy(DailyActivity $dailyActivity)
+{
+    $dailyActivity->delete();
+
+    return redirect()->route('admin.daily_activities.index')
+                     ->with('success', 'Submission deleted.');
+}
 
 }

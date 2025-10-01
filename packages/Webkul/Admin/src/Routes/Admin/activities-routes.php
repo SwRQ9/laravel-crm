@@ -26,9 +26,22 @@ Route::controller(ActivityController::class)->prefix('activities')->group(functi
 });
 
 // Daily Activities
-Route::prefix('daily-activities')->group(function () {
-    Route::get('/', [DailyActivityController::class, 'index'])->name('admin.daily_activities.index');
-    Route::get('form', [DailyActivityController::class, 'form'])->name('admin.daily_activities.form');
-    Route::post('/store', [DailyActivityController::class, 'store'])->name('admin.daily_activities.store');
+Route::prefix('admin/daily-activities')->controller(DailyActivityController::class)->group(function () {
+    Route::get('/', 'index')->name('admin.daily_activities.index');
+
+    // create (Option A)
+    Route::get('/form', 'form')->name('admin.daily_activities.form');
+    Route::post('/store', 'store')->name('admin.daily_activities.store');
+
+    // NEW: view one submission
+    Route::get('/{dailyActivity}', 'show')->name('admin.daily_activities.show');
+
+    // NEW: edit/update (same-day only)
+    Route::get('/{dailyActivity}/edit', 'edit')->name('admin.daily_activities.edit');
+    Route::put('/{dailyActivity}', 'update')->name('admin.daily_activities.update');
+
+    // NEW: delete (same-day only)
+    Route::delete('/{dailyActivity}', 'destroy')->name('admin.daily_activities.destroy');
 });
+
 
