@@ -145,46 +145,67 @@ public function create()
 
 public function show(DailyActivity $dailyActivity)
 {
-    // Ownership check (keep your current rule)
     if ($dailyActivity->user_id !== Auth::id() && !request()->boolean('all')) {
         abort(403);
     }
 
-    // If AJAX/JSON requested → return JSON
-    if (request()->wantsJson() || request()->ajax()) {
-        return response()->json($dailyActivity->load('user'));
-    }
+    $dailyActivity->load(['user', 'entries.activityType']);
 
-    // Otherwise → return Blade view (normal browser navigation)
     return view('admin::daily_activities.show', [
-        'activity' => $dailyActivity->load('user'),
-    ]);
-}
-
-public function edit(DailyActivity $dailyActivity)
-{
-    // later we’ll enforce same-day restriction
-    return view('admin::daily_activities.edit', [
         'activity' => $dailyActivity,
     ]);
 }
 
+
+
+
+
+public function edit(DailyActivity $dailyActivity)
+{
+    // Load existing tally entries and activity types
+    $dailyActivity->load(['entries.activityType']);
+
+    $activityTypes = \App\Models\ActivityType::where('is_active', true)
+        ->orderBy('weight')
+        ->get();
+
+    return view('admin::daily_activities.edit', [
+        'activity' => $dailyActivity,
+        'activityTypes' => $activityTypes,
+    ]);
+}
+
+
 public function update(Request $request, DailyActivity $dailyActivity)
 {
-    // validate like in store()
     $data = $request->validate([
-        // add your tally fields here
+        'tally' => 'required|array',
+        'tally.*' => 'nullable|integer|min:0',
     ]);
 
-    // compute total points (same logic as in store)
-    $dailyActivity->update([
-        // …map $data here…
-        'total_points' => $this->computeTotalPoints($data),
-    ]);
+    // Delete old entries and insert new ones
+    $dailyActivity->entries()->delete();
+
+    foreach ($data['tally'] as $typeId => $value) {
+        if ($value > 0) {
+            $dailyActivity->entries()->create([
+                'activity_type_id' => $typeId,
+                'value' => $value,
+            ]);
+        }
+    }
+
+    // Recalculate total points
+    $total = $dailyActivity->entries()
+        ->join('activity_types', 'activity_types.id', '=', 'daily_activity_entries.activity_type_id')
+        ->sum(\DB::raw('daily_activity_entries.value * activity_types.point_value'));
+
+    $dailyActivity->update(['total_points' => $total]);
 
     return redirect()->route('admin.daily_activities.index')
-                     ->with('success', 'Submission updated.');
+        ->with('success', 'Submission updated successfully.');
 }
+
 
 public function destroy(DailyActivity $dailyActivity)
 {

@@ -35,28 +35,54 @@
     </div>
 
     {{-- Detailed tally section --}}
-    <div class="mt-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-        <div class="mb-3 text-lg font-semibold text-gray-900 dark:text-white">Detailed Tally</div>
-
-        @php
-            // adjust if you store fields differently (e.g., JSON column `tally`)
-            // $tally = $activity->tally ?? [];
-            $tally = []; // TODO: replace with your actual data source
-        @endphp
-
-        @if(!empty($tally))
-            <div class="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-                @foreach($tally as $label => $value)
-                    <div class="flex items-center justify-between rounded border border-gray-200 px-3 py-2 dark:border-gray-700">
-                        <div class="text-sm text-gray-600 dark:text-gray-300">{{ ucwords(str_replace('_',' ',$label)) }}</div>
-                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $value }}</div>
-                    </div>
-                @endforeach
-            </div>
-        @else
-            <div class="text-sm text-gray-500 dark:text-gray-400">
-                No detailed tally saved for this submission.
-            </div>
-        @endif
+    <div class="mt-6 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+    <div class="border-b border-gray-200 px-6 py-3 text-lg font-semibold dark:border-gray-800 dark:text-white">
+        Detailed Tally
     </div>
+
+    @if($activity->entries->count())
+        <table class="w-full border-collapse divide-y divide-gray-200 dark:divide-gray-700">
+    <thead class="bg-gray-100 dark:bg-gray-800">
+        <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider dark:text-gray-300 w-1/2">
+                Task
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider dark:text-gray-300 w-1/4">
+                Value
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider dark:text-gray-300 w-1/4">
+                Points
+            </th>
+        </tr>
+    </thead>
+    <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-700">
+        @forelse ($activity->entries as $entry)
+            <tr>
+                <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-300">
+                    {{ $entry->activityType->name ?? '-' }}
+                </td>
+                <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-300">
+                    {{ $entry->value ?? 0 }}
+                </td>
+                <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-300">
+                    {{ $entry->activityType->point_value ?? 0 }}
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="3" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                    No detailed tally saved for this submission.
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
+
+    @else
+        <div class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+            No detailed tally saved for this submission.
+        </div>
+    @endif
+</div>
+
 </x-admin::layouts>
