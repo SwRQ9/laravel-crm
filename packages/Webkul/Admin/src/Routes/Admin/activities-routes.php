@@ -29,19 +29,19 @@ Route::controller(ActivityController::class)->prefix('activities')->group(functi
 Route::prefix('admin/daily-activities')->controller(DailyActivityController::class)->group(function () {
     Route::get('/', 'index')->name('admin.daily_activities.index');
 
-    // create (Option A)
     Route::get('/form', 'form')->name('admin.daily_activities.form');
     Route::post('/store', 'store')->name('admin.daily_activities.store');
 
-    // NEW: view one submission
-    Route::get('/{dailyActivity}', 'show')->name('admin.daily_activities.show');
+    // ✅ Move analytics above the dynamic {dailyActivity} route
+    Route::get('/analytics', 'analytics')->name('admin.daily_activities.analytics');
+    Route::get('/analytics/data', 'analyticsData')->name('admin.daily_activities.analytics.data');
 
-    // NEW: edit/update (same-day only)
+
+    Route::get('/{dailyActivity}', 'show')->name('admin.daily_activities.show');
     Route::get('/{dailyActivity}/edit', 'edit')->name('admin.daily_activities.edit');
     Route::put('/{dailyActivity}', 'update')->name('admin.daily_activities.update');
-
-    // NEW: delete (same-day only)
     Route::delete('/{dailyActivity}', 'destroy')->name('admin.daily_activities.destroy');
 });
+
 
 

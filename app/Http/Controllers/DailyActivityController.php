@@ -35,6 +35,15 @@ class DailyActivityController extends Controller
 
     $activities = $q->paginate(10);
 
+    // If it's an AJAX request, return JSON with the content
+    if ($request->ajax() || $request->has('ajax')) {
+        $content = view('admin::daily_activities.content', compact('activities'))->render();
+
+        return response()->json([
+            'content' => $content
+        ]);
+    }
+
     return view('admin::daily_activities.index', compact('activities'));
 }
 
@@ -213,6 +222,107 @@ public function destroy(DailyActivity $dailyActivity)
 
     return redirect()->route('admin.daily_activities.index')
                      ->with('success', 'Submission deleted.');
+}
+
+
+public function analytics(Request $request)
+{
+    // ✅ Admin-only access (user_id = 1)
+    if (auth()->id() !== 1) {
+        abort(403, 'Access denied.');
+    }
+
+    $users = \App\Models\User::orderBy('name')->get(['id', 'name']);
+
+    $userId = $request->get('user_id');
+    $from = $request->date('start_date');
+    $to = $request->date('end_date');
+
+    $query = \App\Models\DailyActivity::query()
+        ->with(['user', 'entries.activityType']);
+
+    if ($userId) {
+        $query->where('user_id', $userId);
+    }
+
+    if ($from) {
+        $query->whereDate('created_at', '>=', $from);
+    }
+
+    if ($to) {
+        $query->whereDate('created_at', '<=', $to);
+    }
+
+    $activities = $query->get();
+
+    // ✅ Compute KPIs
+    $totalSubmissions = $activities->count();
+    $totalPoints = $activities->sum('total_points');
+    $averagePoints = $totalSubmissions > 0 ? round($totalPoints / $totalSubmissions, 1) : 0;
+
+    // Find most active category
+    $categoryCounts = [];
+    foreach ($activities as $activity) {
+        foreach ($activity->entries as $entry) {
+            if ($entry->activityType && $entry->activityType->category) {
+                $categoryCounts[$entry->activityType->category] =
+                    ($categoryCounts[$entry->activityType->category] ?? 0) + $entry->value;
+            }
+        }
+    }
+
+    $mostActiveCategory = count($categoryCounts)
+        ? collect($categoryCounts)->sortDesc()->keys()->first()
+        : 'N/A';
+
+    // ✅ Chart Data: Activity Type Points
+    $activityTypePoints = [];
+    foreach ($activities as $activity) {
+        foreach ($activity->entries as $entry) {
+            $name = $entry->activityType->name ?? 'Unknown';
+            $activityTypePoints[$name] =
+                ($activityTypePoints[$name] ?? 0) + $entry->value;
+        }
+    }
+
+    $chartData = [
+        'labels' => array_keys($activityTypePoints),
+        'data' => array_values($activityTypePoints),
+        'colors' => ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+    ];
+
+    // ✅ Chart Data: Points over time
+    $dailyTotals = $activities->groupBy(fn($a) => $a->created_at->format('Y-m-d'))
+        ->map(fn($group) => $group->sum('total_points'));
+
+    $timeSeriesData = [
+        'labels' => $dailyTotals->keys(),
+        'data' => $dailyTotals->values(),
+    ];
+
+    // ✅ Check if we need to show export buttons
+    $hasData = $totalSubmissions > 0;
+
+    // If it's an AJAX request, return JSON with the content and chart data
+    if ($request->ajax() || $request->has('ajax')) {
+        $content = view('admin::daily_activities.analytics_content', compact(
+            'hasData', 'totalSubmissions', 'totalPoints', 'averagePoints',
+            'mostActiveCategory', 'chartData', 'timeSeriesData'
+        ))->render();
+
+        return response()->json([
+            'content' => $content,
+            'chartData' => $chartData,
+            'timeSeriesData' => $timeSeriesData
+        ]);
+    }
+
+    return view('admin::daily_activities.analytics', compact(
+        'users', 'activities', 'userId', 'from', 'to',
+        'totalSubmissions', 'totalPoints', 'averagePoints',
+        'mostActiveCategory', 'chartData', 'timeSeriesData',
+        'hasData'
+    ));
 }
 
 }
