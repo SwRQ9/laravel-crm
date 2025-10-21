@@ -14,7 +14,7 @@
 
             <a href="{{ route('admin.daily_activities.index') }}"
                class="primary-button !bg-gray-200 hover:!bg-gray-300 !text-gray-800 dark:!bg-gray-800 dark:hover:!bg-gray-700 dark:!text-gray-200">
-                ← Back
+                 Back
             </a>
         </div>
 
@@ -24,49 +24,35 @@
             @method('PUT')
 
             <div
-                class="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 p-6 shadow-sm">
+                class="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 p-5 shadow-sm">
                 <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Update Tally</h2>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                    Task
-                                </th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                    Value
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @foreach ($activityTypes as $type)
-                                @php
-                                    $existing = $activity->entries->firstWhere('activity_type_id', $type->id);
-                                @endphp
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                                        {{ $type->name }}
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <input
-                                            type="number"
-                                            name="tally[{{ $type->id }}]"
-                                            value="{{ old('tally.' . $type->id, $existing->value ?? 0) }}"
-                                            min="0"
-                                            class="w-24 text-center rounded-md border border-gray-300 dark:border-gray-700
-                                                   bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100
-                                                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                        />
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <!-- Activities grid - Same layout as form.blade.php -->
+                <div class="grid grid-cols-2 gap-x-5 gap-y-4">
+                    @foreach ($activityTypes as $activityType)
+                        @php
+                            $existing = $activity->entries->firstWhere('activity_type_id', $activityType->id);
+                        @endphp
+                        <div class="flex items-center justify-between p-2 border border-gray-700 rounded-md mb-2">
+                            <label for="activity_{{ $activityType->slug }}"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {{ $activityType->name }}
+                            </label>
 
-            <div class="flex justify-end">
+                            <input type="number"
+                                   name="tally[{{ $activityType->id }}]"
+                                   id="activity_{{ $activityType->slug }}"
+                                   value="{{ old('tally.' . $activityType->id, $existing->value ?? 0) }}"
+                                   class="w-20 rounded-md border border-gray-300 bg-white text-gray-900
+                                      focus:border-brandColor focus:ring-brandColor sm:text-sm
+                                      dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
+                                   min="0">
+                        </div>
+                    @endforeach
+                </div>
+            
+
+            <div class="flex justify-end mt-4">
                 <button type="submit"
                         class="primary-button px-5 py-2 text-sm font-medium">
                     Update Submission
@@ -74,4 +60,5 @@
             </div>
         </form>
     </div>
+</div>    
 </x-admin::layouts>

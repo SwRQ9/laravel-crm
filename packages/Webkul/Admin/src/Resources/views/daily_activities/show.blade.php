@@ -1,15 +1,19 @@
 <x-admin::layouts>
     <x-slot:title>Submission #{{ $activity->id }}</x-slot>
 
-    <div class="flex items-center justify-between mb-4">
-        <h1 class="text-xl font-bold text-gray-800 dark:text-white">
-            Submission #{{ $activity->id }}
-        </h1>
+    <div
+            class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-2 mb-2
+                   text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+            <div class="text-xl font-bold dark:text-white">
+                Submission #{{ $activity->id }}
+            </div>
 
-        <a href="{{ route('admin.daily_activities.index') }}" class="btn btn-secondary">
-            Back
-        </a>
-    </div>
+            <a href="{{ route('admin.daily_activities.index') }}"
+               class="primary-button !bg-gray-200 hover:!bg-gray-300 !text-gray-800 dark:!bg-gray-800 dark:hover:!bg-gray-700 dark:!text-gray-200">
+                 Back
+            </a>
+        </div>
+    
 
     <div class="grid gap-4 md:grid-cols-2">
         <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
@@ -35,13 +39,13 @@
     </div>
 
     {{-- Detailed tally section --}}
-    <div class="mt-6 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+    <div class="mt-6 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 ">
     <div class="border-b border-gray-200 px-6 py-3 text-lg font-semibold dark:border-gray-800 dark:text-white">
         Detailed Tally
     </div>
 
     @if($activity->entries->count())
-        <table class="w-full border-collapse divide-y divide-gray-200 dark:divide-gray-700">
+        <table class="w-full border-collapse divide-y divide-gray-200 dark:divide-gray-700 ">
     <thead class="bg-gray-100 dark:bg-gray-800">
         <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider dark:text-gray-300 w-1/2">
@@ -55,9 +59,9 @@
             </th>
         </tr>
     </thead>
-    <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-700">
+    <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-700 ">
         @forelse ($activity->entries as $entry)
-            <tr>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 "> 
                 <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-300">
                     {{ $entry->activityType->name ?? '-' }}
                 </td>
