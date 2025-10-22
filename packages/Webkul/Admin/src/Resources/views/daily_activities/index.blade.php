@@ -13,18 +13,24 @@
             </div>
 
             <div class="flex items-center gap-x-2.5">
-                <a href="{{ route('admin.daily_activities.form') }}" class="primary-button">
-                    New Submission
-                </a>
-                @php
-                    $isAdmin = auth()->check() && auth()->user()->role_id === 1;
-                @endphp
+                @if (bouncer()->hasPermission('daily_activities.create'))
+            <a href="{{ route('admin.daily_activities.form') }}" class="primary-button">
+                New Submission
+            </a>
+        @endif
 
-                @if ($isAdmin)
-                    <a href="{{ route('admin.daily_activities.analytics') }}" class="primary-button !bg-indigo-500 hover:!bg-indigo-600">
-                        📊 Analytics
-                    </a>
-                @endif
+                @if (bouncer()->hasPermission('daily_activities.analytics'))
+        <a href="{{ route('admin.daily_activities.analytics') }}" 
+           class="primary-button !bg-indigo-500 hover:!bg-indigo-600">
+            📊 Analytics
+        </a>
+    @endif
+    @if (!bouncer()->hasPermission('daily_activities.create') && !bouncer()->hasPermission('daily_activities.analytics'))
+        <span class="text-sm text-gray-500 dark:text-gray-400">
+            No actions available
+        </span>
+    @endif
+                
             </div>
         </div>
 

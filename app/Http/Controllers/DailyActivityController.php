@@ -18,6 +18,10 @@ class DailyActivityController extends Controller
      */
    public function index(Request $request)
 {
+    if (!bouncer()->hasPermission('daily_activities')) {
+        abort(403, 'Unauthorized action.');
+    }
+
     $q = DailyActivity::with('user')->orderByDesc('date');
 
     if (!$request->boolean('all')) {
@@ -50,6 +54,10 @@ class DailyActivityController extends Controller
 
 public function create()
 {
+    if (!bouncer()->hasPermission('daily_activities.create')) {
+        abort(403, 'Unauthorized action.');
+    }
+
     return view('admin::daily_activities.form');
 }
 
@@ -68,6 +76,10 @@ public function create()
      */
     public function store(Request $request)
 {
+    if (!bouncer()->hasPermission('daily_activities.create')) {
+        abort(403, 'Unauthorized action.');
+    }
+
     $validated = $request->validate([
         'date' => ['nullable', 'date'],
         'activities' => ['required', 'array'],
@@ -154,6 +166,10 @@ public function create()
 
 public function show(DailyActivity $dailyActivity)
 {
+    if (!bouncer()->hasPermission('daily_activities.view')) {
+        abort(403, 'Unauthorized action.');
+    }
+    
     if ($dailyActivity->user_id !== Auth::id() && !request()->boolean('all')) {
         abort(403);
     }
@@ -171,6 +187,10 @@ public function show(DailyActivity $dailyActivity)
 
 public function edit(DailyActivity $dailyActivity)
 {
+    if (!bouncer()->hasPermission('daily_activities.edit')) {
+        abort(403, 'Unauthorized action.');
+    }
+
     // Load existing tally entries and activity types
     $dailyActivity->load(['entries.activityType']);
 
@@ -187,6 +207,10 @@ public function edit(DailyActivity $dailyActivity)
 
 public function update(Request $request, DailyActivity $dailyActivity)
 {
+    if (!bouncer()->hasPermission('daily_activities.edit')) {
+        abort(403, 'Unauthorized action.');
+    }
+
     $data = $request->validate([
         'tally' => 'required|array',
         'tally.*' => 'nullable|integer|min:0',
@@ -218,6 +242,10 @@ public function update(Request $request, DailyActivity $dailyActivity)
 
 public function destroy(DailyActivity $dailyActivity)
 {
+    if (!bouncer()->hasPermission('daily_activities.delete')) {
+        abort(403, 'Unauthorized action.');
+    }
+
     $dailyActivity->delete();
 
     return redirect()->route('admin.daily_activities.index')
@@ -227,9 +255,8 @@ public function destroy(DailyActivity $dailyActivity)
 
 public function analytics(Request $request)
 {
-    // ✅ Admin-only access (user_id = 1)
-    if (auth()->id() !== 1) {
-        abort(403, 'Access denied.');
+    if (!bouncer()->hasPermission('daily_activities.analytics')) {
+        abort(403, 'Unauthorized action.');
     }
 
     $users = \App\Models\User::orderBy('name')->get(['id', 'name']);

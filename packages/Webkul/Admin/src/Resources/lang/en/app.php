@@ -44,6 +44,8 @@ return [
         'import'          => 'Import',
         'event'           => 'Event',
         'campaigns'       => 'Campaigns',
+        'daily_activities' => 'Daily Activities',
+        'analytics' => 'Analytics',
     ],
 
     'users' => [

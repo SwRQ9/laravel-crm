@@ -519,9 +519,40 @@ return [
         'sort'  => 4,
     ],
     [
+    'key'   => 'daily_activities',
+    'name'  => 'admin::app.acl.daily_activities',
+    'route' => 'admin.daily_activities.index',
+    'sort'  => 9, 
+], [
+    'key'   => 'daily_activities.create',
+    'name'  => 'admin::app.acl.create',
+    'route' => ['admin.daily_activities.form', 'admin.daily_activities.store'],
+    'sort'  => 1,
+], [
+    'key'   => 'daily_activities.edit',
+    'name'  => 'admin::app.acl.edit',
+    'route' => ['admin.daily_activities.edit', 'admin.daily_activities.update'],
+    'sort'  => 2,
+], [
+    'key'   => 'daily_activities.view',
+    'name'  => 'admin::app.acl.view',
+    'route' => 'admin.daily_activities.show',
+    'sort'  => 3,
+], [
+    'key'   => 'daily_activities.delete',
+    'name'  => 'admin::app.acl.delete',
+    'route' => ['admin.daily_activities.destroy', 'admin.daily_activities.mass_delete'],
+    'sort'  => 4,
+], [
+    'key'   => 'daily_activities.analytics',
+    'name'  => 'admin::app.acl.analytics',
+    'route' => 'admin.daily_activities.analytics',
+    'sort'  => 5,
+], 
+    [
         'key'   => 'configuration',
         'name'  => 'admin::app.acl.configuration',
         'route' => 'admin.configuration.index',
-        'sort'  => 9,
+        'sort'  => 10,
     ],
 ];
