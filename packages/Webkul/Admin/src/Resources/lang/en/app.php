@@ -46,6 +46,7 @@ return [
         'campaigns'       => 'Campaigns',
         'daily_activities' => 'Daily Activities',
         'analytics' => 'Analytics',
+        'view_all_employees_analytics' => 'View All Employees Analytics',
     ],
 
     'users' => [

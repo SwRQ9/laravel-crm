@@ -548,7 +548,12 @@ return [
     'name'  => 'admin::app.acl.analytics',
     'route' => 'admin.daily_activities.analytics',
     'sort'  => 5,
-], 
+], [
+    'key'   => 'daily_activities.analytics.view_all',
+    'name'  => 'admin::app.acl.view_all_employees_analytics',
+    'route' => 'admin.daily_activities.view_all',
+    'sort'  => 6,
+],
     [
         'key'   => 'configuration',
         'name'  => 'admin::app.acl.configuration',

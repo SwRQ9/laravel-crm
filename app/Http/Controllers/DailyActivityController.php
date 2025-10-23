@@ -265,13 +265,27 @@ public function analytics(Request $request)
     $from = $request->date('start_date');
     $to = $request->date('end_date');
 
+    // Check if user has view_all permission
+    $hasViewAllPermission = bouncer()->hasPermission('daily_activities.analytics.view_all');
+
     $query = \App\Models\DailyActivity::query()
         ->with(['user', 'entries.activityType']);
 
-    if ($userId) {
+    // If user has view_all permission, they can choose any user or all
+    if ($hasViewAllPermission && $userId) {
         $query->where('user_id', $userId);
+    } 
+    // If user doesn't have view_all permission, only show their data
+    elseif (!$hasViewAllPermission) {
+        $userId = Auth::id();
+        $query->where('user_id', Auth::id());
+    }
+    // If user has view_all permission but no user_id selected, show all data
+    elseif ($hasViewAllPermission && !$userId) {
+        // No user filter - show all data
     }
 
+    // Date filters (keep your existing logic)
     if ($from) {
         $query->whereDate('created_at', '>=', $from);
     }
@@ -348,7 +362,7 @@ public function analytics(Request $request)
         'users', 'activities', 'userId', 'from', 'to',
         'totalSubmissions', 'totalPoints', 'averagePoints',
         'mostActiveCategory', 'chartData', 'timeSeriesData',
-        'hasData'
+        'hasData', 'hasViewAllPermission'
     ));
 }
 

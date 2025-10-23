@@ -45,23 +45,25 @@
     >
         <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
             <div class="flex flex-wrap items-end gap-4">
-                <!-- User Filter -->
-                <div class="w-64">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Select Employes
-                    </label>
-                    <select
-                        v-model="filters.user_id"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                    >
-                        <option value="">All Employes</option>
-                        @foreach($users as $user)
-                            <option value="{{ $user->id }}">
-                                {{ $user->name }} 
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                <!-- User Filter - Only show if user has view_all permission -->
+@if(bouncer()->hasPermission('daily_activities.analytics.view_all'))
+<div class="w-64">
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        Select Employes
+    </label>
+    <select
+        v-model="filters.user_id"
+        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+    >
+        <option value="">All Employes</option>
+        @foreach($users as $user)
+            <option value="{{ $user->id }}">
+                {{ $user->name }} 
+            </option>
+        @endforeach
+    </select>
+</div>
+@endif
 
                 <!-- Start Date -->
                 <div class="w-48">
