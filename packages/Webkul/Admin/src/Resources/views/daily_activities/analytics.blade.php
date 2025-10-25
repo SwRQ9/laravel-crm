@@ -17,7 +17,9 @@
         </div>
 
         <!-- Vue.js Filters Component -->
-        <v-analytics-filters></v-analytics-filters>
+        <v-analytics-filters
+            :has-view-all-permission="{{ bouncer()->hasPermission('daily_activities.analytics.view_all') ? 'true' : 'false' }}">
+        </v-analytics-filters>
 
         <!-- Analytics Content that will be updated via Vue -->
         <div id="analytics-content">
@@ -103,7 +105,7 @@
                 <div class="flex gap-2">
                     
                     <button 
-                        v-if="hasActiveFilters"
+                        v-if="hasViewAllPermission ? hasActiveFilters : (filters.start_date || filters.end_date)"
                         type="button" 
                         @click="resetFilters" 
                         class="secondary-button px-4 py-2"
@@ -246,6 +248,14 @@
 
     app.component('v-analytics-filters', {
         template: '#v-analytics-filters-template',
+
+        props: {
+        hasViewAllPermission: {
+            type: Boolean,
+            required: true,
+            default: false
+        }
+    },
 
         data() {
             return {
@@ -409,13 +419,11 @@
             console.log('Analytics filters component mounted');
             
             // Auto-apply filters when dropdown changes
-            this.$watch('filters.user_id', () => {
-                if (this.filters.user_id) {
+            this.$watch('filters.user_id', (newVal, oldVal) => {
                     // Small delay to avoid too many requests
                     setTimeout(() => {
                         this.applyFilters();
-                    }, 300);
-                }
+                    }, 300);               
             });
 
             // Auto-apply filters when dates change
