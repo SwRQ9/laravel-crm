@@ -104,7 +104,7 @@ return [
      * daily-activities.
      */
      [
-        'key' => 'daily-activities',
+        'key' => 'daily_activities',
         'name' => 'Daily Activities',
         'route' => 'admin.daily_activities.index',
         'sort' => 8,
