@@ -242,7 +242,7 @@
                 @json($chartData),
                 @json($timeSeriesData)
             );
-        }, 100);
+        }, 150);
         @endif
     });
 
